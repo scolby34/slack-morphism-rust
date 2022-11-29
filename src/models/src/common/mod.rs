@@ -30,8 +30,11 @@ pub struct SlackTs(pub String);
 impl SlackTs {
     pub fn to_date_time(&self) -> Result<DateTime<Utc>, num::ParseIntError> {
         let parts: Vec<&str> = self.value().split('.').collect();
-        let ts_int: i64 = parts[0].parse()?;
-        Ok(Utc.timestamp_millis(ts_int * 1000))
+        let ts_secs: i64 = parts[0].parse()?;
+        let ts_micros: i64 = parts[1].parse()?;
+        Ok(Utc.timestamp_nanos(ts_secs * 1_000_000_000 + ts_micros * 1_000))
+    }
+}
     }
 }
 
