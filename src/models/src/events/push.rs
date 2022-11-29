@@ -7,6 +7,7 @@ use crate::blocks::*;
 use crate::common::*;
 use crate::events::*;
 use crate::messages::*;
+use crate::{SlackFileCommentId, SlackFileId};
 
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -55,6 +56,7 @@ pub enum SlackEventCallbackBody {
     AppMention(SlackAppMentionEvent),
     AppUninstalled(SlackAppUninstalledEvent),
     LinkShared(SlackLinkSharedEvent),
+    ReactionAdded(SlackReactionAddedEvent),
 }
 
 #[skip_serializing_none]
@@ -152,4 +154,38 @@ pub struct SlackLinkSharedEvent {
 pub struct SlackLinkObject {
     pub domain: String,
     pub url: Url,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Builder)]
+pub struct SlackReactionAddedEvent {
+    pub user: SlackUserId,
+    pub reaction: String,
+    pub item_user: Option<SlackUserId>,
+    pub item: SlackReactionItemType,
+    pub event_ts: SlackTs,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum SlackReactionItemType {
+    Message(SlackReactionMessageItem),
+    File(SlackReactionFileItem),
+    FileComment(SlackReactionFileCommentItem),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct SlackReactionMessageItem {
+    pub channel: SlackChannelId,
+    pub ts: SlackTs,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct SlackReactionFileItem {
+    pub file: SlackFileId,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct SlackReactionFileCommentItem {
+    pub file_comment: SlackFileCommentId,
 }
