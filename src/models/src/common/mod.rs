@@ -35,6 +35,10 @@ impl SlackTs {
         Ok(Utc.timestamp_nanos(ts_secs * 1_000_000_000 + ts_micros * 1_000))
     }
 }
+
+impl From<&DateTime<Utc>> for SlackTs {
+    fn from(dt: &DateTime<Utc>) -> Self {
+        SlackTs(format!("{}", dt.format("%s%.6f")))
     }
 }
 
