@@ -3,9 +3,7 @@
 ## Create a client instance
 
 ```rust,noplaypen
-use slack_morphism::*;
-// Slack Morphism Hyper/Tokio support
-use slack_morphism_hyper::*;
+use slack_morphism::prelude::*;
 
 let client = SlackClient::new( SlackClientHyperConnector::new() );
 
@@ -23,12 +21,7 @@ You should securely and properly store all of Slack tokens.
 
 ```rust,noplaypen
 
-use slack_morphism::*;
-use slack_morphism::api::*;
-use slack_morphism_models::*;
-
-// Slack Morphism Hyper/Tokio support
-use slack_morphism_hyper::*;
+use slack_morphism::prelude::*;
 
 async fn example() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
    
@@ -58,4 +51,28 @@ async fn example() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     Ok(())
 }
+```
+
+Note that `session` is just an auxiliary lightweight structure that stores references to the token and the client
+to make easier to have series of calls for the same token.
+It doesn't make any network calls. There is no need to store it.
+
+Another option is to use `session` is to use function `run_in_session`:
+
+```rust,noplaypen
+    // Sessions are lightweight and basically just a reference to client and token
+    client
+        .run_in_session(&token, |session| async move {
+            let test: SlackApiTestResponse = session
+                .api_test(&SlackApiTestRequest::new().with_foo("Test".into()))
+                .await?;
+
+            println!("{:#?}", test);
+
+            let auth_test = session.auth_test().await?;
+            println!("{:#?}", auth_test);
+
+            Ok(())
+        })
+        .await?;
 ```
